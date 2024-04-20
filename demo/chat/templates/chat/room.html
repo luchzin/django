@@ -1,0 +1,104 @@
+<!-- chat/templates/chat/room.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Chat Room</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body::-webkit-scrollbar {
+    width: 0; /* Set the width of the scrollbar to 0 */
+}
+
+/* Optionally, you can style the scrollbar track and thumb */
+        body::-webkit-scrollbar-track {
+    background: transparent; /* Set the background of the scrollbar track */
+}
+
+       body::-webkit-scrollbar-thumb {
+    background: transparent; /* Set the color of the scrollbar thumb */
+}
+body{
+  /* font-size: 32px; */
+}
+    </style>
+</head>
+{% load static %}
+<body class="flex  bg-gray-300 flex-col items-center justify-center text-[2rem] ">
+    <div id="chat-log"  class="  w-[40rem]   flex flex-col   *:overflow-auto *:indent-3  *:text-pretty p-5 gap-4 *:p-2 *:rounded-md *:text-white   *:my-1"></div><br>
+    <div class="flex flex-row gap-2  w:fit-content fixed bottom-10">
+    <input id="chat-message-input" type="text" class="outline-none p-3 rounded-md w-[25rem] text-blue-500"><br>
+    <!-- <img src="{% static 'chat/voice-search.png' %}" width="16"  alt="My image">
+    <img src="{% static 'chat/camera.png' %}"    width="16" height="8"  alt="My image">
+    <img src="{% static 'chat/folder.png' %}" width="16"  alt="My image">
+    <input type="file" name="file" id="file" class="inputfile" />
+      <label for="file">Choose a file</label>
+    </img> -->
+    <input id="chat-message-submit" class="bg-blue-300 outline-none p-2 rounded-md text-bold text-white" type="button" value="Send">
+     <button onclick="leave()" class="fixed top-2  p-1 text-sm rounded-md bg-red-300 text-white">Leave</button>    
+</div>
+    
+    {{ room_name|json_script:"room-name" }}
+  
+    <p id="user" class="invisible">{{user}}</p>
+    <script>
+        const roomName = JSON.parse(document.getElementById('room-name').textContent);
+
+        const chatSocket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/chat/'
+            + roomName
+            + '/'
+        );
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            var element_r=document.createElement("div")
+            element_r.textContent=data.message
+            element_r.style.width='fit-content'
+            element_r.style.maxWidth=  (document.querySelector('#chat-log').offsetWidth -300)  +"px"
+            // element_r.style.textIndent="10px"
+            element_r.style.backgroundColor="#fc8f00"
+           
+
+            if(data.user===document.getElementById("user").textContent){            
+            element_r.style.alignSelf="flex-end"
+            element_r.style.backgroundColor="#80d995"
+
+        } 
+            document.querySelector('#chat-log').appendChild(element_r)
+            element_r.scrollIntoView()
+
+             
+
+        };
+
+        function leave(){
+            window.location.pathname = '/' ;
+
+        }
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+            window.location.pathname = '/' ;
+
+        };
+
+        document.querySelector('#chat-message-input').focus();
+        document.querySelector('#chat-message-input').onkeyup = function(e) {
+            if (e.key === 'Enter') {  // enter, return
+                document.querySelector('#chat-message-submit').click();
+            }
+        };
+
+        document.querySelector('#chat-message-submit').onclick = function(e) {
+            const messageInputDom = document.querySelector('#chat-message-input');
+            const message = messageInputDom.value;
+            chatSocket.send(JSON.stringify({
+                'message': message
+            }));
+            messageInputDom.value = '';
+        };
+    </script>
+</body>
+</html>

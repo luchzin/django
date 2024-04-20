@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Chat Rooms</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-400 flex items-center justify-center h-screen flex-col text-bold text-white">
+    <div class="flex gap-8 items-center ">
+    <p class="text-bold">Name:{{user}}</p>
+    <a href="/auth/logout" class="bg-red-300 p-2 rounded-md"> logout</a>
+    </div>
+    What chat room would you like to enter?<br>
+    <h3></h3>
+    <hr>
+    <input id="room-name-input" type="text" size="100"
+    class="outline-none text-blue-400 rounded w-[10rem] mt-2 mb-0 p-2 "
+    ><br>
+    <input id="room-name-submit" type="button" value="Enter" class="bg-blue-300 p-3 hover:bg-blue-400 rounded-md ">
+    <hr>
+    <script>
+        document.querySelector('#room-name-input').focus();
+        document.querySelector('#room-name-input').onkeyup = function(e) {
+            if (e.key === 'Enter') {  // enter, return
+                document.querySelector('#room-name-submit').click();
+            }
+        };
+
+        document.querySelector('#room-name-submit').onclick = function(e) {
+            var roomName = document.querySelector('#room-name-input').value;
+            window.location.pathname = '/chat/' + roomName + '/';
+        };
+    </script>
+</body>
+</html>
